@@ -70,7 +70,7 @@ Revisiting our earlier calculations, each bucket is responsible for pulling 2000
 - ✔️ Will never miss results when data shifts
 - ✔️ Can be multithreaded
 - ✔️ Efficient DB queries
-- ❌ Data is always in order
+- ❌ Data is always in order (see note)
 
 Data
 ---
@@ -93,6 +93,10 @@ Oftentimes, the offset based pagination is dismissed because it might miss certa
 One tricky consideration is distribution of IDs. If data is deleted often, there might be significant and unequal gaps in different buckets. This could reduce the effectiveness.
 
 As an added benefit, however, the divison of buckets can be modified to favor certain ranges of data. For example, in a chat application, you might want to retrieve newer messages much quicker. Buckets associated with the newest data can be smaller to make pulling quicker when multithreading.
+
+**Ordering**
+
+Even though this approach does not guarantee ordering of data, it is still substantially faster when ordering is required. In the worst case scenario, retrieving _all_ the data and then putting it in order is still much faster than a normal cursor approach (though it requires keeping all objects in memory at once). If data ordering is critical, multiple batches of cursors can be used: eg. take the first fourth of the IDs, and create cursors in that range; once they finish, move to the second fourth, etc.
 
 **Lower bound**
 
